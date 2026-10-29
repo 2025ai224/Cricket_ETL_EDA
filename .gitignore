@@ -1,0 +1,29 @@
+
+# Secrets
+.env
+.env.*
+
+# Allow an example configuration file
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Raw API data
+data/raw/*
+
+# Processed CSV files required by the dashboard
+data/processed/*
+!data/processed/matches.csv
+!data/processed/batting.csv
+!data/processed/bowling.csv
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Jupyter
+.ipynb_checkpoints/
