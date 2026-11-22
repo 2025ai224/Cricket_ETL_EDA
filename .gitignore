@@ -11,8 +11,6 @@ __pycache__/
 *.py[cod]
 .venv/
 
-# Raw API data
-data/raw/*
 
 # Processed CSV files required by the dashboard
 data/processed/*
