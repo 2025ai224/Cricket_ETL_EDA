@@ -1504,3 +1504,38 @@ html, body, .stApp { font-family: var(--body); }
 @media (prefers-reduced-motion: reduce) {
     .bat { animation: none !important; transform: rotate(-20deg); }
 }
+
+/* ==========================================================
+   FIX: keep the 4 banner numbers (Matches, Runs, Wickets,
+   Sixes) in ONE row. The numbers shrink a little on smaller
+   screens instead of dropping onto a second line.
+   ========================================================== */
+.hero-scoreline {
+    display: grid;
+    grid-template-columns: repeat(4, auto);
+    width: fit-content;
+    max-width: 100%;
+}
+
+.hero-scoreline > div {
+    padding: 10px clamp(10px, 1.3vw, 20px);
+}
+
+.hero-scoreline b {
+    font-size: clamp(1.25rem, 2vw, 1.9rem);
+}
+
+.hero-scoreline > div > span {
+    white-space: nowrap;
+}
+
+/* When the banner text area is too narrow for 4 numbers in a row
+   (small laptops, phones), show them as 2 rows of 2 instead.
+   A container query checks the width of the text area itself. */
+.hero-text { container-type: inline-size; }
+
+@container (max-width: 400px) {
+    .hero-scoreline { grid-template-columns: repeat(2, auto); }
+    .hero-scoreline > div:nth-child(2) { border-right: none; }
+    .hero-scoreline > div:nth-child(-n+2) { border-bottom: 1px solid rgba(255, 255, 255, 0.12); }
+}
