@@ -1,68 +1,64 @@
-# PSL ETL + EDA Pipeline
+# PSL Cricket Analytics — ETL + EDA Pipeline
 
-## 1. Project Overview
+An ETL pipeline and data analysis project using **Pakistan Super League (PSL)** cricket data from the **Big Balls Sports Data API**, with an interactive **Streamlit** dashboard.
 
-This project builds an ETL pipeline using Pakistan Super League (PSL) cricket data from the BigBalls Sports Data API.
+**Live dashboard:** https://cricket-etl-eda.streamlit.app/
+## Results
 
-The pipeline will extract match and scorecard data, clean it using Pandas, validate it using Pydantic, save it in CSV files and an SQLite database, and perform exploratory data analysis (EDA).
+| Item | Count |
+|---|---|
+| Completed PSL matches (2016–2026) | 357 |
+| Match scorecards | 357 |
+| Batting records | 5,666 (422 unique batters) |
+| Bowling records | 4,200 (300 unique bowlers) |
 
-## 2. Dataset
+## Project structure
 
-- Sport: Cricket
-- Competition: Pakistan Super League (PSL)
-- API provider: BigBalls Sports Data
-- Catalogue count reported: 357 matches
-- Planned scope: Completed PSL matches with available data
+```
+Cricket_ETL_EDA/
+├── src/                      Python source code
+│   ├── extract.py            E: get matches from the API          (requests)
+│   ├── player_extract.py     E: get each match's scorecard         (requests)
+│   ├── transform.py          T: flatten + clean match data         (pandas)
+│   ├── player_transform.py   T: split scorecards into batting/bowling
+│   ├── validate.py           T: check every record                 (pydantic)
+│   ├── load.py               L: save to CSV and SQLite             (pandas, sqlite3)
+│   ├── main.py               runs transform → validate → load
+│   ├── app.py                Streamlit dashboard                   (streamlit, altair)
+│   └── style.css             dashboard design
+├── data/
+│   ├── raw/                  API responses saved as JSON
+│   └── processed/            matches.csv, batting.csv, bowling.csv, cricket.db
+├── notebooks/
+│   └── cricket_eda.ipynb     exploratory data analysis             (pandas, matplotlib)
+├── assets/psl_hero.jpg       dashboard banner image
+└── .streamlit/config.toml    dashboard theme
+```
 
-The 357 matches are the catalogue count. The number of matches and scorecards successfully extracted will be measured during the project.
+## How to run
 
-## 3. API Endpoints Tested
+```bash
+pip install -r requirements.txt
 
-- `GET /v1/cricket/series` — lists available cricket competitions.
-- `GET /v1/matches` — successfully returned completed PSL match records.
-- `GET /v1/cricket/matches/:id/scorecard` — returned batting and bowling statistics for a tested match.
+# 1. Extract (needs an API key in a .env file:  BBS_API_KEY=your_key)
+python -m src.player_extract      # downloads matches + scorecards into data/raw
 
-The cricket-specific matches endpoint returned no results with the initial series filters. The general matches endpoint worked for PSL data.
+# 2. Transform, validate and load (no API needed)
+python -m src.main                # creates data/processed/*.csv and cricket.db
 
-## 4. Data Fields
+# 3. Dashboard
+python -m streamlit run src/app.py
+```
 
-### Match data
-- Match ID
-- League
-- Home and away teams
-- Scores
-- Match date and status
+Open `notebooks/cricket_eda.ipynb` in Jupyter for the EDA.
 
-### Batting data
-- Player ID and name
-- Runs and balls faced
-- Fours and sixes
-- Strike rate
-- Dismissal type
+## Data notes
 
-### Bowling data
-- Player ID and name
-- Overs and maiden overs
-- Runs conceded
-- Wickets and economy rate
-- Wides and no-balls
+- **Winner** comes from the innings scores. Abandoned matches (a team never batted) have **no result**. In tied matches the **super over** decides the winner, and super-over runs are not added to the team score.
+- An empty **dismissal_type** means the batter was **not out**.
+- Players are counted by **player_id**, because some names (e.g. Mohammad Irfan) belong to two different players.
+- **Overs** use cricket notation: 3.4 overs = 3 overs + 4 balls = 22 balls.
 
-## 5. ETL Pipeline
+## Security
 
-1. Extract data from the API.
-2. Transform and clean data with Pandas.
-3. Validate records with Pydantic.
-4. Load cleaned data into CSV files and SQLite.
-5. Perform EDA using Pandas and Matplotlib.
-
-## 6. Planned EDA
-
-- Team wins and scoring performance
-- Top run scorers
-- Top wicket takers
-- Bowling economy comparisons
-- Data quality: missing values and duplicates
-
-## 7. Security
-
-The API key is stored locally in `.env`. It must not be committed to GitHub or included in shared screenshots, source code, or project reports.
+The API key is stored only in a local `.env` file, which is listed in `.gitignore` and never committed.

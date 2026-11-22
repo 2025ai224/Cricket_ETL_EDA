@@ -33,12 +33,6 @@ def validate_matches(matches):
 
     return validated_matches
 
-
-
-
-from pydantic import BaseModel, ConfigDict
-
-
 class BattingPerformance(BaseModel):
     model_config = ConfigDict(extra="ignore")
 

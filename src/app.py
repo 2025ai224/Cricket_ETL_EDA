@@ -406,6 +406,43 @@ def link_players_to_teams(matches_df, batting_df, bowling_df):
         bowling_df, player_team, match_info, HOME_BOWLING_INNINGS_FALLBACK
     )
 
+    # The batting team of each innings is reliable (checked against the official
+    # scores). The bowling team is simply the OTHER team of that match.
+    # (Voting alone can be wrong for players who changed teams, e.g. in 2026.)
+    innings_batting_team = {}
+    for match_id, innings, team in zip(batting_with_team["match_id"],
+                                       batting_with_team["innings_number"],
+                                       batting_with_team["team"]):
+        if team:
+            innings_batting_team[(match_id, innings)] = team
+
+    # Super over (innings 3 and 4): only 2-3 players bat, so the vote is weak.
+    # Cricket rule: the team that batted second bats first in the super over.
+    # So innings 3 = the team of innings 2, and innings 4 = the team of innings 1.
+    for (match_id, innings) in list(innings_batting_team):
+        if innings == 3 and (match_id, 2) in innings_batting_team:
+            innings_batting_team[(match_id, 3)] = innings_batting_team[(match_id, 2)]
+        if innings == 4 and (match_id, 1) in innings_batting_team:
+            innings_batting_team[(match_id, 4)] = innings_batting_team[(match_id, 1)]
+    batting_with_team["team"] = [
+        innings_batting_team.get((match_id, innings), team)
+        for match_id, innings, team in zip(batting_with_team["match_id"],
+                                           batting_with_team["innings_number"],
+                                           batting_with_team["team"])
+    ]
+
+    bowling_teams = []
+    for match_id, innings, voted_team in zip(bowling_with_team["match_id"],
+                                             bowling_with_team["innings_number"],
+                                             bowling_with_team["team"]):
+        batting_team = innings_batting_team.get((match_id, innings))
+        if batting_team and match_id in match_info:
+            home, away = match_info[match_id]
+            bowling_teams.append(away if batting_team == home else home)
+        else:
+            bowling_teams.append(voted_team)   # no batting rows: keep the vote
+    bowling_with_team["team"] = bowling_teams
+
     return batting_with_team, bowling_with_team
 
 
@@ -830,7 +867,8 @@ with st.sidebar:
     show_html(
         f'<div class="side-status"><div><b>{total_matches:,}</b> matches</div>'
         f'<div><b>{total_teams}</b> teams</div>'
-        f'<div><b>{batting["player_name"].nunique():,}</b> players</div></div>'
+        f'<div><b>{batting["player_key"].nunique():,}</b> batters</div>'
+        f'<div><b>{bowling["player_key"].nunique():,}</b> bowlers</div></div>'
         '<div class="side-foot">Built on the Cricket ETL + EDA pipeline</div>'
     )
 
@@ -1327,7 +1365,12 @@ elif page == "Match Scorecard":
             innings_teams = match_batting.loc[match_batting["innings_number"] == innings, "team"].dropna()
             labels.append((innings, valid_team(innings_teams.iloc[0]) if not innings_teams.empty else ""))
 
-        tabs = st.tabs([f"{team or 'Team not identified'} · innings {int(innings)}" for innings, team in labels])
+        # Innings 3 and 4 are the super over (played when the main innings are tied)
+        tab_names = []
+        for innings, team in labels:
+            innings_name = f"innings {int(innings)}" if innings <= 2 else "super over"
+            tab_names.append(f"{team or 'Team not identified'} · {innings_name}")
+        tabs = st.tabs(tab_names)
         for tab, (innings, batting_team) in zip(tabs, labels):
             with tab:
                 if batting_team == home_team:

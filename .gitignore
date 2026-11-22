@@ -27,3 +27,5 @@ data/processed/*
 
 # Jupyter
 .ipynb_checkpoints/
+# ...except our project database, so examiners can see the SQLite output
+!data/processed/cricket.db

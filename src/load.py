@@ -21,7 +21,8 @@ def load_matches(validated_matches):
     processed_folder.mkdir(parents=True, exist_ok=True)
 
     # Convert the records into a Pandas DataFrame
-    matches_df = pd.DataFrame(validated_matches)
+    # convert_dtypes() keeps scores as whole numbers (136, not 136.0)
+    matches_df = pd.DataFrame(validated_matches).convert_dtypes()
 
     # Save the records as a CSV file
     csv_path = processed_folder / "matches.csv"

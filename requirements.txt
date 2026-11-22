@@ -1,8 +1,15 @@
-
+# Extraction
 requests
-pandas
-pydantic
 python-dotenv
+
+# Transformation, validation and loading
+pandas
+pydantic>=2
+
+# EDA notebook
 matplotlib
 jupyter
-streamlit
+
+# Dashboard
+streamlit>=1.40
+altair
