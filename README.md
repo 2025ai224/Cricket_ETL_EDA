@@ -3,6 +3,14 @@
 An ETL pipeline and data analysis project using **Pakistan Super League (PSL)** cricket data from the **Big Balls Sports Data API**, with an interactive **Streamlit** dashboard.
 
 **Live dashboard:** https://cricket-etl-eda.streamlit.app/
+
+## Project description
+
+**Why this dataset:** PSL cricket data has clear numbers (runs, wickets, balls, overs) and clear results (who won), so it is well suited to analysing team performance, match outcomes and player contributions.
+
+**Where the data is loaded:** Raw API responses are saved as JSON (`data/raw/`). Cleaned and validated data is loaded into CSV files, which are easy to inspect, and an SQLite database (`cricket.db`), which gives structured storage that can be queried with SQL.
+
+**Planned EDA:** data quality (missing values, duplicates, checking strike rate and economy), team wins and win %, team scores across seasons, top run scorers, strike rates, fours and sixes, dismissal types, leading wicket-takers and bowling economy.
 ## Results
 
 | Item | Count |
